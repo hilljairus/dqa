@@ -1,5 +1,6 @@
-
-
+source("preview_summary.R")
+source("tab2module.R")
+source("tab3module.R")
 library(shiny)
 library(shinythemes)
 # Define UI for application that draws a histogram
@@ -32,8 +33,10 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
     ),
     tabPanel("Clean&Filter","Clean & Filter",
              clean_filterUI("clnFt")
+             ),
+    tabPanel("dqa1","dqa1",
+             fluidRow(dimUI("cmplt"))
              )
-        
         
  )
 )
@@ -57,6 +60,9 @@ server <- function(input, output,session) {
     output$class<-renderPrint(preview_coltype(data()))
     
     callModule(clean_filterServer,"clnFt",tidied=data(),session=session)
+    dimData<-callModule(clean_filterServer,"clnFt",tidied=data(),session=session)
+    callModule(dimServer,"cmplt",data=dimData)
+    
 }
 
 # Run the application 

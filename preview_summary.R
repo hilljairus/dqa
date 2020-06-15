@@ -1,4 +1,5 @@
 library(tidyverse)
+
 preview_coltype<-function(file){
  print(as.data.frame(sapply(file,class)))
 }
@@ -32,4 +33,35 @@ unite_ui<-function(name_space,unite_cond,var){
                  
 }
 
+##creating ui for tab 3
+make_ui<-function(var,ns){
+  h3
+  verbatimTextOutput(ns(var))
+}
 
+
+reg<-"n/?a|not *available"
+completeness<-function(x,var){
+  if(is.numeric(x)){
+    rng<-range(x,na.rm=TRUE)
+    len<-length(x[!is.na(x)])
+    prc<-(len/length(x))*100
+    
+    cat(paste0(var,": has values between ", rng[1], " and ", rng[2],"\n"))
+    cat(sprintf("%s has %i non-missing values representing %1.2f%% completeness\n",var,len,prc))
+
+  }else if(is.character(x)){
+    len<-length(x[!is.na(x)])
+    prc<-(len/length(x))*100
+    sus<-str_subset(x,regex(reg,ignore_case = TRUE))
+    if(length(sus)>0){
+     list(cat(paste0("noteable mention: ",sus,"\n")))
+      } else {cat("\n")}
+    
+    cat(sprintf("%s has %i non-missing values representing %1.2f%% completeness\n",var,len,prc))
+    
+  } else if(is.factor(x)){
+    lev<-levels(x)
+    cat(var,": has the following levels: ",lev," \n",sep ="\t")
+  }
+}

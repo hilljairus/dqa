@@ -82,9 +82,18 @@ clean_filterServer<-function(input,output,session,tidied){
     map(vars(),~filter_UI(uno()[[.x]],.x,ns))
   })
   filtered<-reactive({
-    selected<-map(vars(),~filter_Server(uno()[[.x]],input$prices))
+    selected<-map(vars(),~filter_Server(uno()[[.x]],input[[.x]]))
     reduce(selected,`&`)
   }) 
   output$ftable<-renderTable(head(uno()[filtered(), ]))
+  
+  return(list(
+    mydata=reactive({
+      x<-uno()[filtered(),]
+      x
+      })
+    )
+    )
+  
 }
   
