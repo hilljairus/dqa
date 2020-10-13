@@ -1,5 +1,7 @@
-
-
+source("preview_summary.R")
+source("tab2module.R")
+source("tab3module.R")
+source("file_input.R")
 library(shiny)
 library(shinythemes)
 # Define UI for application that draws a histogram
@@ -8,55 +10,26 @@ ui <- fluidPage(theme=shinytheme("cerulean"),
 
 
     tabPanel("home","Upload...",
-             sidebarLayout(
-                 sidebarPanel(
-             fileInput("file",NULL,accept=".csv"),
-             checkboxInput("head","Display Everything",TRUE),
-             conditionalPanel(condition = "input.head==false",
-                 numericInput("n","Number of rows to display",12)
-             ),
-                  numericInput("skip","Rows to skip",0),
-                  
-                  tags$hr(),
-             
-             
-                 verbatimTextOutput("class")
-                 ),
-                mainPanel(
-                    h3("Raw Data"),
-                    tableOutput("preview"))
-                   
-                    
-             )
-             
+            fileInput_UI("flnpt")
     ),
     tabPanel("Clean&Filter","Clean & Filter",
              clean_filterUI("clnFt")
+             ),
+    tabPanel("dqa1","dqa1",
+             dimUI("cmplt")
              )
-        
         
  )
 )
 
 server <- function(input, output,session) {
-    data<-reactive({
-        req(input$file)
-        ext<-tools::file_ext(input$file$name)
-        switch(ext,
-            csv=vroom::vroom(input$file$datapath,skip=input$skip),
-            validate("Invalid File; Please Upload .csv file"))
-    })
     
-    output$preview<-renderTable(
-        if(input$head){
-            data()
-        }else{
-        head(data(),input$n)
-        }
-    )
-    output$class<-renderPrint(preview_coltype(data()))
+    callModule(fileInput_server, "flnpt")
+    fileData<-callModule(fileInput_server, "flnpt")
+    callModule(clean_filterServer,"clnFt",tidied=fileData$mydata(),session=session)
+    dimData<-callModule(clean_filterServer,"clnFt",tidied=fileData$mydata(),session=session)
+    callModule(dimServer,"cmplt",data=dimData)
     
-    callModule(clean_filterServer,"clnFt",tidied=data(),session=session)
 }
 
 # Run the application 
